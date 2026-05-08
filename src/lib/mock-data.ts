@@ -222,6 +222,7 @@ export const calcCumulativeTax = (
 
 // Ngưỡng tối thiểu để mở chức năng yêu cầu rút tiền (theo brief mới)
 export const MIN_PAYOUT = 250_000;
+export const TAX_PIT_THRESHOLD = 250_000;
 
 // ==================== MOCK DATA ====================
 export const affiliates: Affiliate[] = [

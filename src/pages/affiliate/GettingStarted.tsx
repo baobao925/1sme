@@ -95,7 +95,7 @@ const GettingStarted = () => (
       </Carousel>
     </div>
 
-    <div className="mt-12 bg-card border border-border rounded-xl p-6 shadow-soft">
+    {/* <div className="mt-12 bg-card border border-border rounded-xl p-6 shadow-soft">
       <h3 className="font-display font-bold mb-4 flex items-center gap-2">
          <CheckCircle2 className="w-5 h-5 text-success" />
          Các câu hỏi thường gặp
@@ -118,7 +118,7 @@ const GettingStarted = () => (
           <span className="text-muted-foreground leading-relaxed block">Sử dụng nút "Khiếu nại của tôi" tại Menu Trợ giúp ở cột bên trái để gửi các yêu cầu trợ giúp chi tiết liên quan đến thanh toán và hoa hồng.</span>
         </div>
       </div>
-    </div>
+    </div> */}
   </>
 );
 
