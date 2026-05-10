@@ -63,7 +63,8 @@ export const Sidebar = () => {
       <div className="px-5 py-5 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center shadow-glow">
-            <ShieldCheck className="w-5 h-5 text-primary-foreground" />
+            {/*<ShieldCheck className="w-5 h-5 text-primary-foreground" />*/}
+            <img src="../../../public/logo.png" className="rounded"/>
           </div>
           <div>
             <div className="font-display font-bold text-white text-base leading-tight">1SME</div>
