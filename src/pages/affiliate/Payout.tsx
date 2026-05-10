@@ -143,7 +143,7 @@ const Payout = () => {
           <h3 className="font-display font-bold">Lịch sử yêu cầu rút tiền</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[1100px]">
+          <table className="w-full text-sm min-w-[1220px]">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="text-left px-5 py-3 font-semibold">Mã yêu cầu</th>
@@ -161,6 +161,7 @@ const Payout = () => {
                 <th className="text-right px-5 py-3 font-semibold">Thực nhận</th>
                 <th className="text-center px-5 py-3 font-semibold">Trạng thái</th>
                 <th className="text-left px-5 py-3 font-semibold">Ngày tạo</th>
+                <th className="text-left px-5 py-3 font-semibold">Ngày thanh toán</th>
               </tr>
             </thead>
             <tbody>
@@ -178,6 +179,7 @@ const Payout = () => {
                   <td className="px-5 py-3 text-right font-bold text-primary">{formatVND(p.net)}</td>
                   <td className="px-5 py-3 text-center"><StatusBadge status={p.status} /></td>
                   <td className="px-5 py-3 text-xs text-muted-foreground">{formatDate(p.createdAt)}</td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">{p.paidAt ? formatDate(p.paidAt) : "—"}</td>
                 </tr>
               ))}
             </tbody>
