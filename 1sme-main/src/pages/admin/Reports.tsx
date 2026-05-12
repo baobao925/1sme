@@ -3,7 +3,9 @@ import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { affiliates, conversions, products, payoutRequests } from "@/lib/mock-data";
 import { formatVND, formatNumber } from "@/lib/format";
-import { FileSpreadsheet, FileText, ShoppingCart, RotateCcw, Coins, Receipt, Wallet, BarChart3 } from "lucide-react";
+import { FileSpreadsheet, FileText, ShoppingCart, RotateCcw, Coins, Receipt, Wallet, BarChart3, Lock, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
 
@@ -12,6 +14,17 @@ const Reports = () => {
   const [affFilter, setAffFilter] = useState("all");
   const [productFilter, setProductFilter] = useState("all");
   const [vendorFilter, setVendorFilter] = useState("all");
+
+  const [isLockDialogOpen, setIsLockDialogOpen] = useState(false);
+  const [lockStartDate, setLockStartDate] = useState("");
+  const [lockEndDate, setLockEndDate] = useState("");
+  const [isConfirmChecked, setIsConfirmChecked] = useState(false);
+  
+  const handleLockPeriod = () => {
+    toast.success("Khóa kỳ đối soát thành công. Dữ liệu trong kỳ đã được cố định để phục vụ thanh toán và đối soát.");
+    setIsLockDialogOpen(false);
+    setIsConfirmChecked(false);
+  };
 
   const productMap = Object.fromEntries(products.map(p => [p.id, p]));
   const affMap = Object.fromEntries(affiliates.map(a => [a.id, a]));
@@ -83,6 +96,111 @@ const Reports = () => {
         subtitle="Bảng tổng quan đầy đủ trường thông tin · Filter theo Affiliate / Sản phẩm / Nhà cung cấp / Tháng"
         actions={
           <>
+            <Dialog open={isLockDialogOpen} onOpenChange={setIsLockDialogOpen}>
+              <DialogTrigger asChild>
+                <button className="px-3 py-2 text-sm font-semibold border border-primary text-primary hover:bg-primary/10 rounded-md flex items-center gap-2">
+                  <Lock className="w-4 h-4" /> Khóa kỳ đối soát
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <div className="mx-auto w-12 h-12 rounded-full bg-warning/20 text-warning flex items-center justify-center mb-4">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <DialogTitle className="text-center text-xl">Xác nhận khóa kỳ đối soát</DialogTitle>
+                  <DialogDescription className="text-center text-base">
+                    Thông báo việc cố định dữ liệu hoa hồng và thanh toán
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-6 mt-4">
+                  {/* Dates */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Từ ngày <span className="text-destructive">*</span></label>
+                      <input type="date" value={lockStartDate} onChange={(e) => setLockStartDate(e.target.value)} className="w-full px-3 py-2 border border-border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Đến ngày <span className="text-destructive">*</span></label>
+                      <input type="date" value={lockEndDate} onChange={(e) => setLockEndDate(e.target.value)} className="w-full px-3 py-2 border border-border rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                  </div>
+
+                  {/* Warning Box */}
+                  <div className="bg-warning/10 border border-warning/20 p-4 rounded-lg">
+                    <p className="font-semibold text-warning-foreground mb-2 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Hiện vẫn còn dữ liệu chưa hoàn tất xử lý:
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-warning-foreground/80">
+                      <li><span className="font-bold">{conversions.filter(c => c.status === "hold").length}</span> hoa hồng đang tạm giữ</li>
+                      <li><span className="font-bold">{payoutRequests.filter(p => ["pending", "processing"].includes(p.status)).length}</span> yêu cầu thanh toán đang xử lý</li>
+                    </ul>
+                  </div>
+
+                  {/* Info Text */}
+                  <div className="text-sm text-muted-foreground space-y-2 bg-muted/30 p-4 rounded-lg border border-border">
+                    <p>Bạn vẫn có thể khóa kỳ, tuy nhiên các phát sinh sau đó sẽ được chuyển sang kỳ tiếp theo.</p>
+                    <p className="font-semibold mt-2 text-foreground">Sau khi khóa kỳ:</p>
+                    <ul className="list-disc list-inside space-y-1 pl-2">
+                      <li>Không thể thay đổi trạng thái hoa hồng của các đơn hàng trong kỳ</li>
+                      <li>Không thể cập nhật lại số liệu đối soát hoặc tính toán lại hoa hồng</li>
+                      <li>Không thể thêm/xóa đơn hàng khỏi kỳ đối soát</li>
+                      <li>Các yêu cầu thanh toán sẽ được thực hiện dựa trên số liệu đã khóa</li>
+                    </ul>
+                    <p className="mt-2">Các phát sinh hoàn trả/điều chỉnh sau thời điểm khóa kỳ sẽ được ghi nhận vào kỳ đối soát tiếp theo.</p>
+                  </div>
+
+                  {/* Summary Section */}
+                  <div>
+                    <h4 className="font-semibold mb-3">Thống kê dữ liệu tổng hợp kỳ</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
+                        <p className="text-xs text-muted-foreground mb-1">Tổng đơn chuyển đổi</p>
+                        <p className="font-semibold">{formatNumber(totalOrders)}</p>
+                      </div>
+                      <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
+                        <p className="text-xs text-muted-foreground mb-1">Tổng doanh thu</p>
+                        <p className="font-semibold text-success">{formatVND(gmv)}</p>
+                      </div>
+                      <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
+                        <p className="text-xs text-muted-foreground mb-1">Tổng hoa hồng hợp lệ</p>
+                        <p className="font-semibold text-primary">{formatVND(validCommission)}</p>
+                      </div>
+                      <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
+                        <p className="text-xs text-muted-foreground mb-1">Thuế PIT tạm khấu trừ</p>
+                        <p className="font-semibold text-warning">{formatVND(taxDeducted)}</p>
+                      </div>
+                      <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
+                        <p className="text-xs text-muted-foreground mb-1">Tổng thực chi dự kiến</p>
+                        <p className="font-semibold text-accent">{formatVND(validCommission - taxDeducted)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Checkbox */}
+                  <div className="flex items-start space-x-3 bg-primary/5 p-4 rounded-lg border border-primary/20 mt-4">
+                    <Checkbox id="confirm-lock" checked={isConfirmChecked} onCheckedChange={(checked) => setIsConfirmChecked(!!checked)} className="mt-1" />
+                    <label htmlFor="confirm-lock" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                      Tôi xác nhận đã kiểm tra số liệu đối soát và đồng ý khóa kỳ thanh toán.
+                    </label>
+                  </div>
+                </div>
+
+                <DialogFooter className="mt-6">
+                  <button onClick={() => setIsLockDialogOpen(false)} className="px-4 py-2 text-sm font-semibold border border-border hover:bg-muted rounded-md transition-colors">
+                    Hủy
+                  </button>
+                  <button 
+                    onClick={handleLockPeriod} 
+                    disabled={!isConfirmChecked || !lockStartDate || !lockEndDate} 
+                    className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Xác nhận khóa kỳ
+                  </button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <button onClick={() => toast.success("Đã xuất Excel (mock)")} className="px-3 py-2 text-sm font-semibold border border-border hover:bg-muted rounded-md flex items-center gap-2">
               <FileSpreadsheet className="w-4 h-4" /> Excel
             </button>
